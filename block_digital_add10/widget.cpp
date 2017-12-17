@@ -19,18 +19,22 @@ QPushButton *sumButton;
 QLabel *lbl1;
 QLabel *lbl2;
 int startVal=9;
-int uMatrix=16;
+int uMatrix=20;
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    QString texts[] = {"1", "2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"};
-    QList<int> list = generateUniqueRandomNumber(startVal);
+    QString texts[] = {"1", "2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"};
+    //QList<int> list = generateUniqueRandomNumber(startVal);//产生10个数
+    QList<int> list = generateRandomNumber2(7);//产生8个数
+    QList<int> alllist;
+    alllist.append(list);
+    list=generateUniqueRandomNumber(7);//8个
     for(int a=0;a<list.size();a++){
         int number = list.at(a);
-        if(number>7){
-            while(number>7){
+        if(number>6){
+            while(number>6){
                 number = generateRandomNumber(6);
             }
             list[a]=number;
@@ -38,15 +42,27 @@ Widget::Widget(QWidget *parent) :
             while(number==0){
                 number = generateRandomNumber(6);
             }
+            list[a]=number;
         }
     }
-
-    for(int i=0;i<list.size();i++){
-        texts[i]=QString::number(list.at(i));
+    alllist.append(list);
+    list=generateUniqueRandomNumber(7);//8个
+    for(int a=0;a<list.size();a++){
+        int number = list.at(a);
+        if(number==0){
+            while(number==0){
+                number = generateRandomNumber(6);
+            }
+            list[a]=number;
+        }
     }
-    qDebug()<<"first:"+QString::number(list.size());
+    alllist.append(list);
+    qDebug()<<"total list :"+QString::number(alllist.size());
+    for(int i=0;i<alllist.size();i++){
+        texts[i]=QString::number(alllist.at(i));
+    }
     this->setWindowTitle("QGridLayout");
-    this->resize(700, 600);
+    this->resize(800, 750);
     QHBoxLayout *topLayout = new QHBoxLayout;
     sumButton = new QPushButton(this);
     sumButton->setStyleSheet("text-align: center;background-color: rgb(255, 255, 255);font-size:55px;");
@@ -78,25 +94,14 @@ Widget::Widget(QWidget *parent) :
 
     topLayout->addWidget(sumButton);
 
-    QList<int> alllist;
-    list=generateRandomNumber2(startVal);
-    alllist.append(list);
-    list=generateRandomNumber2(startVal);
-    alllist.append(list);
-    qDebug()<<"second:"+QString::number(alllist.size());
-    int k=0;
-    for(int i=startVal+1;i<uMatrix;i++){
-        texts[i]=QString::number(alllist.at(k));
-        k++;
-    }
-
     QGridLayout *gridLayout = new QGridLayout;
     gridLayout->setSpacing(2);
     gridLayout->setMargin(2);
-    for(int i=0, k = 0; i < 4;i++,k+=4)
-    {
+    for(int i=0, k = 0; i < 6;i++,k+=4)
+    {//5行4列
         for(int j = 0; j < 4;j++)
-        {
+        {//4列
+            //qDebug()<<"indexbutton :"+QString::number(k+j);
             QPushButton *button = new QPushButton(texts[k+j]);
             button->setObjectName("numbutton:"+QString::number(k+j)+":"+texts[k+j]);
             button->setFixedHeight(80);
@@ -123,7 +128,7 @@ int  Widget::generateRandomNumber(int maxVal)
 QList<int>  Widget::generateRandomNumber2(int maxVal)
 {
     QList<int> numbersList;
-    maxVal=maxVal/2+2;
+    maxVal=maxVal;
     numbersList=generateUniqueRandomNumber(maxVal);
     return numbersList;
 }
@@ -137,30 +142,24 @@ QList<int> Widget::generateUniqueRandomNumber(int parMaxVal)
     {
         numbersList.append(qrand()%parMaxVal);
         bool flag=true;
-        while(flag)
-        {
-           for(j=0;j<i;j++)
-           {
+        while(flag){
+           for(j=0;j<i;j++){
                if(numbersList[i]==numbersList[j])
-               {
                    break;
-               }
            }
-           if(j<i)
-           {
+           if(j<i) {
                numbersList[i]=rand()%parMaxVal;
            }
-           if(j==i)
-           {
+           if(j==i){
                flag=!flag;
            }
        }
     }
-
+    /**
     for(i=0;i<parMaxVal;i++)
     {
         qDebug()<<"last:"+QString::number(numbersList[i]);
-    }
+    }**/
     return numbersList;
 }
 int disappear_num=0;
@@ -169,12 +168,12 @@ void Widget::buttonIsOnClick()
     //获取信号源头对象的名称
     QString strObjectSrc = this->sender()->objectName();
 
-    qDebug()<<strObjectSrc; //打印源头对象名称
+    //qDebug()<<strObjectSrc; //打印源头对象名称
     //将要显示的消息
     QString strMsg;
     //判断是哪个按钮发的信号
     QPushButton *btn=qobject_cast<QPushButton*>(sender());
-    qDebug()<<btn->text();
+    //qDebug()<<btn->text();
     QString val=btn->text();
     bool ok;
     int dVal = val.toInt(&ok,10);
@@ -184,8 +183,8 @@ void Widget::buttonIsOnClick()
         selButton=btn;
         lbl1->setText(QString::number(dVal));
     }else if(select == 2){
-        qDebug()<<"selButton:"+selButton->objectName();
-        qDebug()<<"btn:"+btn->objectName();
+        //qDebug()<<"selButton:"+selButton->objectName();
+        //qDebug()<<"btn:"+btn->objectName();
         if(selButton->objectName()==btn->objectName()){
              lbl2->setText("?");
              select=1;//这样方便进行第二次选择，要将无法选择了
@@ -202,22 +201,23 @@ void Widget::buttonIsOnClick()
             lbl2->setText("?");
             disappear_num++;
             qDebug()<<"disappear_num:"+QString::number(disappear_num);
-            if(disappear_num==8){
+            if(disappear_num==12){
                 QMessageBox::information(this, tr("通关"), "恭喜你通过测试");
                 return;
-            }
-            sum = generateRandomNumber(startVal);
-            while(disappear_num<4 && sum<2){
+            }else if(disappear_num<3){
                 sum = generateRandomNumber(startVal);
+                while(disappear_num<4 && sum<2){
+                    sum = generateRandomNumber(startVal);
+                }
+                sumButton->setText(QString::number(sum));
             }
-            sumButton->setText(QString::number(sum));
 
             select=0;
             selectVal=0;
 
             QObjectList list = children();
             QList<int> iteList;
-            if(disappear_num>2){//迭代出所有的按钮，方便计算剩余的值是多少
+            if(disappear_num>2){//第一次是随机值作为和,迭代出所有的按钮，方便计算剩余的值是多少
                 foreach (QObject *obj, list) {
                     if (obj->metaObject()->className() == QStringLiteral("QPushButton")){
                         QPushButton *b = qobject_cast<QPushButton*>(obj);
@@ -246,46 +246,27 @@ void Widget::buttonIsOnClick()
             return;
         }
     }
-
-    /****
-    if( "pushButtonAnderson" == strObjectSrc )
-    {
-        strMsg = tr("Hello Anderson! Your food is coming!");
-    }
-    else if( "pushButtonBruce" == strObjectSrc )
-    {
-        strMsg = tr("Hello Bruce! Your food is coming!");
-    }
-    else if( "pushButtonCastiel" == strObjectSrc )
-    {
-        strMsg = tr("Hello Castiel! Your food is coming!");
-    }
-    else
-    {
-        //do nothing
-        return;
-    }***********/
-    //显示送餐消息
-    //QMessageBox::information(this, tr("Food"), strMsg);
 }
 
 int  Widget::computerMinVal(QList<int> array)
 {
+    qSort(array.begin(),array.end());
     QList<int> iteList,minList;
     int len = array.size();
     for(int i=0;i<len;i++){
         for(int k=i+1;k<len;k++){
+            qDebug()<<QString::number(array[i])+"="+QString::number(array[k]);
             int total = array[i]+array[k];
             iteList.append(total);
-            if(startVal>total){
-                minList.append(total);
+            if(startVal>=total){
+               minList.append(total);
             }
         }
     }
     if(minList.size()>0){
         return minList[minList.size()-1];
     }else{
-        qSort(iteList.begin(), iteList.end());
+        //qSort(iteList.begin(), iteList.end());
         return iteList[0];
     }
     return 0;
